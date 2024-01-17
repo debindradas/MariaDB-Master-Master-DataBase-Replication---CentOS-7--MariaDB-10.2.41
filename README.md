@@ -41,53 +41,66 @@ groupadd mysql
 
 ## 3. Create mysql User with primary group mysql
 
+```console
 useradd -g mysql mysql
+```
 
 ## 4. Change MariaDB binary file Ownership
 
+```console
 chown -R mysql:mysql /opt/mariadb/mysql/
+```
 
 ## 5. Copy my.cnf file 
 
+```console
 cp /opt/mariadb/mysql/support-files/my-small.cnf /etc/my.cnf
 cp: overwrite ‘/etc/my.cnf’? y
+```
 
 ## 6. Create Data Directory for Mysql
 
+```console
 mkdir -p /var/lib/mysql
+```
 
 ## 7. Edit MariaDB config file /etc/my.cnf
 
+```console
 [server] #create if not exists#
 basedir=/opt/mariadb/mysql
 datadir=/var/lib/mysql
 user=mysql
-
+```
 
 ## 8. Initialize System tables
 
+```console
 /opt/mariadb/mysql/scripts/mysql_install_db --user=mysql --basedir=/opt/mariadb/mysql
-
+```
 ## 9. Enable mysql on System Boot
 
+```console
 ln -s /opt/mariadb/mysql/support-files/mysql.server /etc/init.d/mysql
 cd /etc/init.d/
 chkconfig --add mysql
+```
 
 
 ## 10. Start & Verify Mysql Service
-
+```console
 systemctl start mysql
 systemctl status mysql
+```
 
 ## 11. Set Mysql root password
-
+```console
 /opt/mariadb/mysql/bin/mysqladmin -uroot password
 New password: <Enter_New_passwd>
 Confirm new password:<Confirm_New_passwd>
-
+```
 ## 12. Initialize secure
-
+```console
 /opt/mariadb/mysql/bin/mysql_secure_installation --basedir=/opt/mariadb/mysql
 
 ##Sample Output-Start
@@ -151,29 +164,29 @@ installation should now be secure.
 Thanks for using MariaDB!
 
 ##Sample Output-End
-
+```
 ## 13. Add Binary File location into bashrc file
-
+```console
 vi /root/.bashrc
 
 PATH=$PATH:/opt/mariadb/mysql/bin
 MANPATH=$MANPATHL/opt/mariadb/mysql/man
-
+```
 ## 14. Reboot Node 1 & after boot verify mysql status
-
+```console
 systemctl status mysql
-
+```
 
 ## 15. Allow Mysql port on firewalld
-
+```console
 firewall-cmd --add-port=3306/tcp --permanen
 firewall-cmd --reload
-
+```
 ## 16. Repeate Step 1 to 15 on Node 2
 
 
 ## 17. Node 1 : Connect to mysql Database & create a sample Database , we will use the database for replication
-
+```console
 mysql -uroot -p<your_passwd>
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MariaDB connection id is 9
@@ -229,15 +242,15 @@ MariaDB [country]>
 
 MariaDB [(none)]> quit;
 Bye
-
-##17. Node 1: Create backup of the country Database, copy to Node 2 , we will restore it later
-
+````
+## 18. Node 1: Create backup of the country Database, copy to Node 2 , we will restore it later
+```console
 mysqldump country > /tmp/country.sql -uroot -p 
 
 rsync -avzr /tmp/country.sql root@192.168.0.217:/tmp
-
+```
 ## 19. Node 2 Create country Database and Restore the copied dump
-
+```console
 MariaDB [(none)]> create database country;
 Query OK, 1 row affected (0.00 sec)
 
@@ -272,9 +285,9 @@ MariaDB [country]> select * from country_master;
 +-------+
 4 rows in set (0.01 sec)
 
-
+````
 ## 20. Node 1: & Node 2: Edit /etc/my.cnf
-
+```console
 [mysqld]#Under mysqld
 
 server-id = 101 #102 for Node 2
@@ -282,9 +295,9 @@ binlog-do-db=country #country is my database name , change it accordingly#
 relay-log = mysql-relay-bin
 relay-log-index = mysql-relay-bin.index
 log-bin = mysql-bin
-
+```
 ## 21. Node 1: & Node 2: Connect to mysql - create Replication user & grant permission
-
+```console
 create user 'replusr'@'%' identified by 'replusrpswd'; 
 grant replication slave on *.* to 'replusr'@'%';
 flush privileges;
@@ -312,9 +325,9 @@ MariaDB [(none)]> show master status;
 +------------------+----------+--------------+------------------+
 1 row in set (0.00 sec)
 
-
+```
 ## 21. Node 1: Connect to DB & run belwo querry
-
+```console
 MariaDB [(none)]> show master status;
 +------------------+----------+--------------+------------------+
 | File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |
@@ -386,9 +399,9 @@ Master_SSL_Verify_Server_Cert: No
 ERROR: No query specified
 
 ## verify for Seconds_Behind_Master: 0 & Slave_IO_State: Waiting for master to send event
-
+```
 ## 22. Node 2: Connect to DB & run belwo querry
-
+```console
 MariaDB [(none)]> show master status;
 +------------------+----------+--------------+------------------+
 | File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |
@@ -464,9 +477,9 @@ ERROR: No query specified
 
 ## verify for Seconds_Behind_Master: 0 & Slave_IO_State: Waiting for master to send event
 
-
+```
 ## 22. Verify Replication by inserting/deleting values on both server
-
+```console
 ## Insert new values in Node 1
 
 MariaDB [country]> insert into country_master values ('UK');
@@ -515,9 +528,9 @@ MariaDB [country]> show master status;
 +------------------+----------+--------------+------------------+
 1 row in set (0.01 sec)
 
-
+```
 ## Delete a row from Node 2 
-
+```console
 MariaDB [country]> delete from country_master where name='China';
 Query OK, 1 row affected (0.00 sec)
 
@@ -544,5 +557,5 @@ MariaDB [country]> select * from country_master;
 | UK    |
 +-------+
 4 rows in set (0.00 sec)
-
+```
 ## Thank You Hope this content will help in configuring MariaDB Master-Master Replication.
