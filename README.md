@@ -5,17 +5,17 @@ MariaDB Master-Master DataBase Replication Configuration using CentOS 7.9 &amp; 
 
 Master-Master DataBase Replication Configuration, I'm using two CentOS 7.9 nodes for database replication, below are nodes details:
 
-##Node 1:
+## Node 1:
 IP: 192.168.0.216
 OS: CentOS Linux release 7.9.2009 (Core)
 MariaDb: mysql  Ver 15.1 Distrib 10.2.41-MariaDB, for Linux (x86_64) using readline 5.1
 
-##Node 2:
+## Node 2:
 IP: 192.168.0.217
 OS: CentOS Linux release 7.9.2009 (Core)
 MariaDb: mysql  Ver 15.1 Distrib 10.2.41-MariaDB, for Linux (x86_64) using readline 5.1
 
-##1. Installation of MariaDB (Manual Method)
+## 1. Installation of MariaDB (Manual Method)
 
 cd /opt/
 wget https://archive.mariadb.org/mariadb-10.2.41/bintar-linux-systemd-x86_64/mariadb-10.2.41-linux-systemd-x86_64.tar.gz --no-check-certificate
@@ -24,28 +24,28 @@ mkdir -p /opt/mariadb/mysql/
 mv mariadb-10.2.41-linux-systemd-x86_64/* mariadb/mysql/
 
 
-##2. Create mysql Group
+## 2. Create mysql Group
 
 groupadd mysql
 
-##3. Create mysql User with primary group mysql
+## 3. Create mysql User with primary group mysql
 
 useradd -g mysql mysql
 
-##4. Change MariaDB binary file Ownership
+## 4. Change MariaDB binary file Ownership
 
 chown -R mysql:mysql /opt/mariadb/mysql/
 
-##Copy my.cnf file 
+## 5. Copy my.cnf file 
 
 cp /opt/mariadb/mysql/support-files/my-small.cnf /etc/my.cnf
 cp: overwrite ‘/etc/my.cnf’? y
 
-##5. Create Data Directory for Mysql
+## 6. Create Data Directory for Mysql
 
 mkdir -p /var/lib/mysql
 
-##6. Edit MariaDB config file /etc/my.cnf
+## 7. Edit MariaDB config file /etc/my.cnf
 
 [server] #create if not exists#
 basedir=/opt/mariadb/mysql
@@ -53,29 +53,29 @@ datadir=/var/lib/mysql
 user=mysql
 
 
-##7. Initialize System tables
+## 8. Initialize System tables
 
 /opt/mariadb/mysql/scripts/mysql_install_db --user=mysql --basedir=/opt/mariadb/mysql
 
-##8. Enable mysql on System Boot
+## 9. Enable mysql on System Boot
 
 ln -s /opt/mariadb/mysql/support-files/mysql.server /etc/init.d/mysql
 cd /etc/init.d/
 chkconfig --add mysql
 
 
-##9. Start & Verify Mysql Service
+## 10. Start & Verify Mysql Service
 
 systemctl start mysql
 systemctl status mysql
 
-##10. Set Mysql root password
+## 11. Set Mysql root password
 
 /opt/mariadb/mysql/bin/mysqladmin -uroot password
 New password: <Enter_New_passwd>
 Confirm new password:<Confirm_New_passwd>
 
-##11. Initialize secure
+## 12. Initialize secure
 
 /opt/mariadb/mysql/bin/mysql_secure_installation --basedir=/opt/mariadb/mysql
 
@@ -141,27 +141,27 @@ Thanks for using MariaDB!
 
 ##Sample Output-End
 
-##12. Add Binary File location into bashrc file
+## 13. Add Binary File location into bashrc file
 
 vi /root/.bashrc
 
 PATH=$PATH:/opt/mariadb/mysql/bin
 MANPATH=$MANPATHL/opt/mariadb/mysql/man
 
-##13. Reboot Node 1 & after boot verify mysql status
+## 14. Reboot Node 1 & after boot verify mysql status
 
 systemctl status mysql
 
 
-##14. Allow Mysql port on firewalld
+## 15. Allow Mysql port on firewalld
 
 firewall-cmd --add-port=3306/tcp --permanen
 firewall-cmd --reload
 
-##15. Repeate Step 1 to 14 on Node 2
+## 16. Repeate Step 1 to 15 on Node 2
 
 
-##16. Node 1 : Connect to mysql Database & create a sample Database , we will use the database for replication
+## 17. Node 1 : Connect to mysql Database & create a sample Database , we will use the database for replication
 
 mysql -uroot -p<your_passwd>
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
@@ -225,7 +225,7 @@ mysqldump country > /tmp/country.sql -uroot -p
 
 rsync -avzr /tmp/country.sql root@192.168.0.217:/tmp
 
-##18. Node 2 Create country Database and Restore the copied dump
+## 19. Node 2 Create country Database and Restore the copied dump
 
 MariaDB [(none)]> create database country;
 Query OK, 1 row affected (0.00 sec)
@@ -262,7 +262,7 @@ MariaDB [country]> select * from country_master;
 4 rows in set (0.01 sec)
 
 
-##18. Node 1: & Node 2: Edit /etc/my.cnf
+## 20. Node 1: & Node 2: Edit /etc/my.cnf
 
 [mysqld]#Under mysqld
 
@@ -272,7 +272,7 @@ relay-log = mysql-relay-bin
 relay-log-index = mysql-relay-bin.index
 log-bin = mysql-bin
 
-##19. Node 1: & Node 2: Connect to mysql - create Replication user & grant permission
+## 21. Node 1: & Node 2: Connect to mysql - create Replication user & grant permission
 
 create user 'replusr'@'%' identified by 'replusrpswd'; 
 grant replication slave on *.* to 'replusr'@'%';
@@ -281,7 +281,7 @@ flush tables with read lock;
 stop slave;
 show master satus;
 
-##Node 1
+## Node 1
 
 MariaDB [(none)]> show master status;
 +------------------+----------+--------------+------------------+
@@ -291,7 +291,7 @@ MariaDB [(none)]> show master status;
 +------------------+----------+--------------+------------------+
 1 row in set (0.00 sec)
 
-##Node 2
+## Node 2
 
 MariaDB [(none)]> show master status;
 +------------------+----------+--------------+------------------+
@@ -302,7 +302,7 @@ MariaDB [(none)]> show master status;
 1 row in set (0.00 sec)
 
 
-##20. Node 1: Connect to DB & run belwo querry
+## 21. Node 1: Connect to DB & run belwo querry
 
 MariaDB [(none)]> show master status;
 +------------------+----------+--------------+------------------+
@@ -374,9 +374,9 @@ Master_SSL_Verify_Server_Cert: No
 
 ERROR: No query specified
 
-##verify for Seconds_Behind_Master: 0 & Slave_IO_State: Waiting for master to send event
+## verify for Seconds_Behind_Master: 0 & Slave_IO_State: Waiting for master to send event
 
-##21. Node 2: Connect to DB & run belwo querry
+## 22. Node 2: Connect to DB & run belwo querry
 
 MariaDB [(none)]> show master status;
 +------------------+----------+--------------+------------------+
@@ -451,12 +451,12 @@ Master_SSL_Verify_Server_Cert: No
 
 ERROR: No query specified
 
-##verify for Seconds_Behind_Master: 0 & Slave_IO_State: Waiting for master to send event
+## verify for Seconds_Behind_Master: 0 & Slave_IO_State: Waiting for master to send event
 
 
-##22. Verify Replication by inserting/deleting values on both server
+## 22. Verify Replication by inserting/deleting values on both server
 
-##Insert new values in Node 1
+## Insert new values in Node 1
 
 MariaDB [country]> insert into country_master values ('UK');
 Query OK, 1 row affected (0.01 sec)
@@ -482,7 +482,7 @@ MariaDB [country]> show master status;
 1 row in set (0.01 sec)
 
 
-##Reflecting on Node 2:
+## Reflecting on Node 2:
 
 MariaDB [country]> select * from country_master;
 +-------+
@@ -505,7 +505,7 @@ MariaDB [country]> show master status;
 1 row in set (0.01 sec)
 
 
-##Delete a row from Node 2
+## Delete a row from Node 2 
 
 MariaDB [country]> delete from country_master where name='China';
 Query OK, 1 row affected (0.00 sec)
@@ -521,7 +521,7 @@ MariaDB [country]> select * from country_master;
 +-------+
 4 rows in set (0.00 sec)
 
-##Reflecting on Node 1 
+## Reflecting on Node 1 
 
 MariaDB [country]> select * from country_master;
 +-------+
@@ -534,4 +534,4 @@ MariaDB [country]> select * from country_master;
 +-------+
 4 rows in set (0.00 sec)
 
-#Thank You Hope this content will help in configuring MariaDB Master-Master Replication.
+## Thank You Hope this content will help in configuring MariaDB Master-Master Replication.
