@@ -35,8 +35,9 @@ mv mariadb-10.2.41-linux-systemd-x86_64/* mariadb/mysql/
 
 
 ## 2. Create mysql Group
-
+```console
 groupadd mysql
+```
 
 ## 3. Create mysql User with primary group mysql
 
