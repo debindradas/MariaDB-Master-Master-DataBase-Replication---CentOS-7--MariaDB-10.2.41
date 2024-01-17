@@ -25,11 +25,13 @@ MariaDb: mysql  Ver 15.1 Distrib 10.2.41-MariaDB, for Linux (x86_64) using readl
 
 ## 1. Installation of MariaDB (Manual Method)
 
+```console
 cd /opt/
 wget https://archive.mariadb.org/mariadb-10.2.41/bintar-linux-systemd-x86_64/mariadb-10.2.41-linux-systemd-x86_64.tar.gz --no-check-certificate
 tar -xvf mariadb-10.2.41-linux-systemd-x86_64.tar.gz
 mkdir -p /opt/mariadb/mysql/
 mv mariadb-10.2.41-linux-systemd-x86_64/* mariadb/mysql/
+```
 
 
 ## 2. Create mysql Group
