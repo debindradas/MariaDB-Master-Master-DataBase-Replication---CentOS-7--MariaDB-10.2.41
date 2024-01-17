@@ -6,14 +6,22 @@ MariaDB Master-Master DataBase Replication Configuration using CentOS 7.9 &amp; 
 Master-Master DataBase Replication Configuration, I'm using two CentOS 7.9 nodes for database replication, below are nodes details:
 
 ## Node 1:
+
 IP: 192.168.0.216
+
 OS: CentOS Linux release 7.9.2009 (Core)
+
 MariaDb: mysql  Ver 15.1 Distrib 10.2.41-MariaDB, for Linux (x86_64) using readline 5.1
 
+
 ## Node 2:
+
 IP: 192.168.0.217
+
 OS: CentOS Linux release 7.9.2009 (Core)
+
 MariaDb: mysql  Ver 15.1 Distrib 10.2.41-MariaDB, for Linux (x86_64) using readline 5.1
+
 
 ## 1. Installation of MariaDB (Manual Method)
 
