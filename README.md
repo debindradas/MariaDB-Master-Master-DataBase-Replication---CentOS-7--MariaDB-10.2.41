@@ -303,7 +303,7 @@ grant replication slave on *.* to 'replusr'@'%';
 flush privileges;
 flush tables with read lock;
 stop slave;
-show master satus;
+show master status;
 
 ## Node 1
 
